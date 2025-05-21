@@ -95,6 +95,8 @@ int main() {
             std::vector<std::string> tags4 = {"error"};
             searchTagTest(dbManager, tags4);
 
+            // 테스트 코드 끝
+
         }else {
             std::cerr << "Database setup failed!" << std::endl;
             return 1;
@@ -106,3 +108,5 @@ int main() {
 
     return 0; // main함수 종료 시 dbManager 소멸자 호출 -> DB연결이 자동으로 닫힘
 }
+
+// TODO : 입력받아 파일 추가.. 태그 추가.. GUI 구현..
