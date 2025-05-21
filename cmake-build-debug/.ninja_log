@@ -1,0 +1,5 @@
+# ninja log v6
+9	1872	7695501614684137	CMakeFiles/file_tag.dir/main.cpp.obj	61be11408ee97f85
+2173	2562	7695503418738466	file_tag.exe	86e17c2602da6d4c
+3	307	7695507030119296	build.ninja	ecb5a84d30596968
+10	2171	7695503397109769	CMakeFiles/file_tag.dir/database_manager.cpp.obj	743605b4cdfb036
