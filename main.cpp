@@ -1,5 +1,28 @@
+#include <algorithm>
+
 #include "database_manager.h"
 #include "vector"
+
+void linkingTest(DatabaseManager &dbManager, int fileId, int tagId) {
+    bool linking = dbManager.linkFileTag(fileId, tagId);
+    if (linking) {
+        std::cout << "Linking FileID "<< fileId << "with "<< tagId <<"!" << std::endl;
+    }else {
+        std::cerr << "Failed to link "<< fileId << "with "<< tagId << std::endl;
+    }
+}
+
+void searchTagTest(DatabaseManager &dbManager, std::vector<std::string> tags) {
+    std::vector<std::string> foundTags = dbManager.searchFileByTags(tags);
+    std::cout << "Files with tag:" << std::endl;
+    if (foundTags.empty()) {
+        std::cout << " No files found.." << std::endl;
+    }else {
+        for (const auto& path : foundTags) {
+            std::cout << "  - "<< path << std::endl;
+        }
+    }
+}
 
 int main() {
     // 데이터 베이스 파일 경로 지정 (ex. 실행 파일과 같은 폴더에 생성)
@@ -50,46 +73,27 @@ int main() {
                 }
             }
 
-            // TODO: 태그 연결, 검색 등
-
             std::cout << "\n--- Linking Files and Tags ---" << std::endl;
             // 예시 연결 (실제 ID는 콘솔 출력 또는 뷰어 확인 필요)
             // 예: 파일 ID 1 (C++_0_OT_2025.pdf)에 태그 ID 1 (고급프로그래밍) 연결
-            bool linkSuccess1 = dbManager.linkFileTag(1, 1);
-            if (linkSuccess1) {
-                std::cout << "Linking FileID 1 with TagID!" << std::endl;
-            }else {
-                std::cerr << "Failed to link FileID 1 with TagID 1" << std::endl;
-            }
-
+            linkingTest(dbManager, 1, 1);
             // 예: 파일 ID 1에 태그 ID 3 (강의자료) 연결
-            bool linkSuccess2 = dbManager.linkFileTag(1, 3);
-            if (linkSuccess2) {
-                std::cout << "Linking FileID 1 with TagID 3!" << std::endl;
-            }else {
-                std::cerr << "Failed to link FileID 1 with TagID 3" << std::endl;
-            }
-
-            bool linkSuccess3 = dbManager.linkFileTag(2, 1);
-            if (linkSuccess3) {
-                std::cout << "Linking FileID 2 with TagID 1!" << std::endl;
-            }else {
-                std::cerr << "Failed to link FileID 2 with TagID 1" << std::endl;
-            }
-            bool linkSuccess4 = dbManager.linkFileTag(2, 5);
-            if (linkSuccess4) {
-                std::cout << "Linked FileID 2 with TagID 5" << std::endl;
-            }else {
-                std::cerr << "Failed to link FileID 2 with TagID 5" << std::endl;
-            }
-
+            linkingTest(dbManager, 1, 3);
+            linkingTest(dbManager, 2, 1);
+            linkingTest(dbManager, 2, 5);
             // 존재하지 않는 ID로 오류 테스트..
-            bool linkFailure1 = dbManager.linkFileTag(999, 1);
-            if (linkFailure1) {
-                std::cout << "Success!" << std::endl;
-            }else {
-                std::cerr << "Fail.." << std::endl;
-            }
+            linkingTest(dbManager, 999, 5);
+
+            // 검색 테스트
+            std::cout << "\n--- Searching Files by Tags ---" << std::endl;
+            std::vector<std::string> tags1 = {"고급프로그래밍"};
+            searchTagTest(dbManager, tags1);
+            std::vector<std::string> tags2 = {"고급프로그래밍", "강의자료"};
+            searchTagTest(dbManager, tags2);
+            std::vector<std::string> tags3 = {"발표자료"};
+            searchTagTest(dbManager, tags3);
+            std::vector<std::string> tags4 = {"error"};
+            searchTagTest(dbManager, tags4);
 
         }else {
             std::cerr << "Database setup failed!" << std::endl;

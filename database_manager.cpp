@@ -1,5 +1,6 @@
 #include "database_manager.h"
-#include "filesystem"
+#include <filesystem>
+#include <set>
 
 // 생성자
 DatabaseManager::DatabaseManager(const std::string& dbPath): dbConnection(nullptr), databasePath(dbPath){
@@ -17,6 +18,15 @@ DatabaseManager::DatabaseManager(const std::string& dbPath): dbConnection(nullpt
         // TODO: 오류처리 필요 - 예외를 throw하거나 오류 상태를 기록
     }else {
         std::cout << "Database opened Successfully " << this->databasePath << std::endl;
+        // **추가:** FOREIGN KEY 제약 조건 활성화
+        // 이 PRAGMA는 데이터베이스 연결마다 한 번씩 실행
+        rc = sqlite3_exec(this->dbConnection, "PRAGMA foreign_keys = ON;", nullptr, nullptr, nullptr);
+        if (rc != SQLITE_OK) {
+            std::cerr << "Failed to enable FOREIGN KEY constraints: " << sqlite3_errmsg(this->dbConnection) << std::endl;
+            // FOREIGN KEY 활성화 실패는 심각한 오류 -> 연결을 닫고 오류 처리
+            sqlite3_close(this->dbConnection);
+            this->dbConnection = nullptr;
+        }
     }
 }
 // 소멸자
@@ -259,16 +269,90 @@ bool DatabaseManager::linkFileTag(int fileId, int tagId) {
     // SQL 매개변수에 값 바인딩 (정수)
     sqlite3_bind_int(insertStmt, 1, fileId);
     sqlite3_bind_int(insertStmt, 2, tagId);
-
+    // 쿼리 실행
+    rc = sqlite3_step(insertStmt);
+    if (rc != SQLITE_DONE) {
+        // SQLITE_DONE는 INSERT 성공 혹은 IGNORE 시 반환
+        std::cerr << "Failed to execute link statement: " << sqlite3_errmsg(dbConnection) << " (Code: " << rc << ")" << std::endl;
+        sqlite3_finalize(insertStmt);
+        return false;
+    }
+    // insertStmt 정리
     sqlite3_finalize(insertStmt);
 
     // 성공적으로 삽입 또는 무시됨
-    // 만약 실제로 삽입되었는지 확인하고 싶다면 sqlite3_changes() 함수를 사용할 수 있습니다.
+    // 만약 실제로 삽입되었는지 확인하고 싶다면 sqlite3_changes() 함수를 사용할 수 있다.
     // int changes = sqlite3_changes(dbConnection);
     // if (changes > 0) { std::cout << "Link added: FileID " << fileId << " <-> TagID " << tagId << std::endl; }
     // else { std::cout << "Link already exists (ignored): FileID " << fileId << " <-> TagID " << tagId << std::endl; }
 
-    return true;
+    return true; // 성공 (insert or ignore 됨)
 }
 
-// TODO: 파일-태그 연결, search 등
+std::vector<std::string> DatabaseManager::searchFileByTags(const std::vector<std::string>& tagNames) {
+    std::vector<std::string> foundFilePaths;
+    if (!isConnected()) {
+        std::cerr << "Database is not Connected!" << std::endl;
+        return foundFilePaths;
+    }
+    if (tagNames.empty()) { // 숏컷 - 태그 없으면 바로 종료
+        std::cout << "No tags found!" << std::endl;
+        return foundFilePaths;
+    }
+
+    // 태그에서 중복된걸 제거하고, 검색에 쓸 새로운 unique 태그 목록을 만든다
+    std::set<std::string> uniqueTagNames(tagNames.begin(), tagNames.end());
+    int enumUniqueTags = uniqueTagNames.size();
+
+    // SQL 쿼리 문자열 동적 생성
+    std::ostringstream sqlStream;
+    sqlStream << "SELECT F.FilePath "
+              << "From Files AS F "
+              << "JOIN FileTags AS FT ON F.FileID = FT.FileID "
+              << "JOIN Tags AS T ON FT.TagID = T.TagID "
+              << "WHERE T.TagName IN (";
+
+    // '?' 플레이스홀더를 태그 개수만큼 추가
+    for (int i = 0; i < enumUniqueTags; ++i) { // 왜 ++i?
+        sqlStream << "?";
+        if (i < enumUniqueTags - 1) {
+            sqlStream << ", ";
+        }
+    }
+    sqlStream << ") "
+            << "GROUP BY F.FileID, F.FilePath "
+            << "HAVING COUNT(DISTINCT T.TagID) = ?;"; // 마지막 ? 는 고유 태그의 개수
+
+    std::string sqlQuery = sqlStream.str();
+    sqlite3_stmt* stmt = nullptr;
+    int rc = sqlite3_prepare_v2(this->dbConnection, sqlQuery.c_str(), -1, &stmt, nullptr);
+
+    if (rc != SQLITE_OK) {
+        std::cerr << "Failed to prepare search statement: " << sqlite3_errmsg(dbConnection) << std::endl;
+        return foundFilePaths;
+    }
+
+    // 플레이스홀더에 값 바인딩
+    int bindIdx = 1;
+    for (const auto& tagName : uniqueTagNames) {
+        sqlite3_bind_text(stmt, bindIdx++, tagName.c_str(), -1, SQLITE_TRANSIENT); // bindIdx 는 한 루프마다 ++ 해준다.
+    }
+    sqlite3_bind_int(stmt, bindIdx, enumUniqueTags); // 마지막 플레이스홀더(?)에 고유 태그 개수 바인딩
+
+    // 쿼리 실행
+    while ((rc = sqlite3_step(stmt)) == SQLITE_ROW) {
+        const unsigned char* filePath = sqlite3_column_text(stmt, 0);
+        if (filePath) {
+            foundFilePaths.push_back(reinterpret_cast<const char*>(filePath));
+        }
+    }
+
+    if (rc != SQLITE_DONE) {
+        std::cerr << "Failed to execute search statement: " << sqlite3_errmsg(dbConnection) << std::endl;
+        foundFilePaths.clear(); // 오류 시 결과 초기화
+    }
+
+    sqlite3_finalize(stmt); // stmt 종료
+    return foundFilePaths;
+
+}
