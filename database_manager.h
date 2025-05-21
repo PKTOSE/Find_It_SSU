@@ -1,10 +1,12 @@
 #ifndef DATABASE_MANAGER_H
 #define DATABASE_MANAGER_H
 
-#include "sqlite3.h"
-#include "string"
+#include <sqlite3.h>
+#include <string>
 #include "iostream"
-#include "filesystem"
+#include <filesystem>
+#include <vector>
+#include <sstream>
 
 class DatabaseManager {
 private:
@@ -24,6 +26,9 @@ public:
     int addFile(const std::string& filePath); // 파일 주소 추가, file ID 반환, 실패시 -1 반환
     int addTag(const std::string& tagName); // 파일에 태그 추가, 태그 ID 반환, 실패시 -1 반환
     bool linkFileTag(int fileId, int tagId); // 파일 - 태그 연결 (성공 / 실패)
+    std::vector<std::string> searchFileByTags(const std::vector<std::string>& tagNames); // 태그 기반 파일 검색
+
+    sqlite3* getDBConnection(){return dbConnection;};
     // TODO: 데이터 조회 등의 멤버 함수를 추가
 };
 
