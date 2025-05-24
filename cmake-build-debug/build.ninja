@@ -63,6 +63,20 @@ build CMakeFiles/file_tag.dir/database_manager.cpp.obj: CXX_COMPILER__file_tag_u
   OBJECT_DIR = CMakeFiles\file_tag.dir
   OBJECT_FILE_DIR = CMakeFiles\file_tag.dir
 
+build CMakeFiles/file_tag.dir/file_manager.cpp.obj: CXX_COMPILER__file_tag_unscanned_Debug C$:/FILES/CLIonProjects/25-1/file_tag/file_manager.cpp || cmake_object_order_depends_target_file_tag
+  DEP_FILE = CMakeFiles\file_tag.dir\file_manager.cpp.obj.d
+  FLAGS = -g -std=gnu++20 -fdiagnostics-color=always
+  INCLUDES = -IC:/FILES/CLIonProjects/25-1/file_tag/libs/sqlite3
+  OBJECT_DIR = CMakeFiles\file_tag.dir
+  OBJECT_FILE_DIR = CMakeFiles\file_tag.dir
+
+build CMakeFiles/file_tag.dir/tag_manager.cpp.obj: CXX_COMPILER__file_tag_unscanned_Debug C$:/FILES/CLIonProjects/25-1/file_tag/tag_manager.cpp || cmake_object_order_depends_target_file_tag
+  DEP_FILE = CMakeFiles\file_tag.dir\tag_manager.cpp.obj.d
+  FLAGS = -g -std=gnu++20 -fdiagnostics-color=always
+  INCLUDES = -IC:/FILES/CLIonProjects/25-1/file_tag/libs/sqlite3
+  OBJECT_DIR = CMakeFiles\file_tag.dir
+  OBJECT_FILE_DIR = CMakeFiles\file_tag.dir
+
 
 # =============================================================================
 # Link build statements for EXECUTABLE target file_tag
@@ -71,7 +85,7 @@ build CMakeFiles/file_tag.dir/database_manager.cpp.obj: CXX_COMPILER__file_tag_u
 #############################################
 # Link the executable file_tag.exe
 
-build file_tag.exe: CXX_EXECUTABLE_LINKER__file_tag_Debug CMakeFiles/file_tag.dir/main.cpp.obj CMakeFiles/file_tag.dir/database_manager.cpp.obj | C$:/FILES/CLIonProjects/25-1/file_tag/libs/sqlite3/sqlite3.lib
+build file_tag.exe: CXX_EXECUTABLE_LINKER__file_tag_Debug CMakeFiles/file_tag.dir/main.cpp.obj CMakeFiles/file_tag.dir/database_manager.cpp.obj CMakeFiles/file_tag.dir/file_manager.cpp.obj CMakeFiles/file_tag.dir/tag_manager.cpp.obj | C$:/FILES/CLIonProjects/25-1/file_tag/libs/sqlite3/sqlite3.lib
   FLAGS = -g
   LINK_LIBRARIES = C:/FILES/CLIonProjects/25-1/file_tag/libs/sqlite3/sqlite3.lib  -lkernel32 -luser32 -lgdi32 -lwinspool -lshell32 -lole32 -loleaut32 -luuid -lcomdlg32 -ladvapi32
   OBJECT_DIR = CMakeFiles\file_tag.dir

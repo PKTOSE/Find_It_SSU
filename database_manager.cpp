@@ -1,6 +1,7 @@
 #include "database_manager.h"
 #include <filesystem>
 #include <set>
+#include <sstream>
 
 // 생성자
 DatabaseManager::DatabaseManager(const std::string& dbPath): dbConnection(nullptr), databasePath(dbPath){
@@ -94,6 +95,11 @@ int DatabaseManager::addFile(const std::string& filePath) {
     }
     // 1. 파일 경로에서 파일 이름 추출
     std::filesystem::path p(filePath); // path 객체 생성
+    if (!std::filesystem::exists(p)) {
+        std::cerr << "File " << filePath << " does not exist!" << std::endl;
+        return -1; // 파일이 존재 X -> 추가하지 않음
+    }
+
     std::string fileName = p.filename().string(); // path 객체에 있는 filename 함수..
 
     // SQLite Prepared Statements 객체
@@ -259,7 +265,7 @@ bool DatabaseManager::linkFileTag(int fileId, int tagId) {
 
     sqlite3_stmt* insertStmt = nullptr;
     const char* insertSQL = "INSERT OR IGNORE INTO FileTags (FileID, TagID) VALUES (?, ?);";
-    int rc = sqlite3_prepare_v2(this->dbConnection, insertSQL, -2, &insertStmt, nullptr);
+    int rc = sqlite3_prepare_v2(this->dbConnection, insertSQL, -1, &insertStmt, nullptr);
     if (rc != SQLITE_OK) { // INSERT / IGNORE 성공시 SQLITE_OK 반환
         std::cerr << "Failed to prepare link statement: " << sqlite3_errmsg(dbConnection) << std::endl;
         sqlite3_finalize(insertStmt);
@@ -302,7 +308,7 @@ std::vector<std::string> DatabaseManager::searchFileByTags(const std::vector<std
 
     // 태그에서 중복된걸 제거하고, 검색에 쓸 새로운 unique 태그 목록을 만든다
     std::set<std::string> uniqueTagNames(tagNames.begin(), tagNames.end());
-    int enumUniqueTags = uniqueTagNames.size();
+    int numUniqueTags = uniqueTagNames.size();
 
     // SQL 쿼리 문자열 동적 생성
     std::ostringstream sqlStream;
@@ -313,9 +319,9 @@ std::vector<std::string> DatabaseManager::searchFileByTags(const std::vector<std
               << "WHERE T.TagName IN (";
 
     // '?' 플레이스홀더를 태그 개수만큼 추가
-    for (int i = 0; i < enumUniqueTags; ++i) { // 왜 ++i?
+    for (int i = 0; i < numUniqueTags; ++i) { // 왜 ++i?
         sqlStream << "?";
-        if (i < enumUniqueTags - 1) {
+        if (i < numUniqueTags - 1) {
             sqlStream << ", ";
         }
     }
@@ -337,7 +343,7 @@ std::vector<std::string> DatabaseManager::searchFileByTags(const std::vector<std
     for (const auto& tagName : uniqueTagNames) {
         sqlite3_bind_text(stmt, bindIdx++, tagName.c_str(), -1, SQLITE_TRANSIENT); // bindIdx 는 한 루프마다 ++ 해준다.
     }
-    sqlite3_bind_int(stmt, bindIdx, enumUniqueTags); // 마지막 플레이스홀더(?)에 고유 태그 개수 바인딩
+    sqlite3_bind_int(stmt, bindIdx, numUniqueTags); // 마지막 플레이스홀더(?)에 고유 태그 개수 바인딩
 
     // 쿼리 실행
     while ((rc = sqlite3_step(stmt)) == SQLITE_ROW) {
@@ -355,4 +361,243 @@ std::vector<std::string> DatabaseManager::searchFileByTags(const std::vector<std
     sqlite3_finalize(stmt); // stmt 종료
     return foundFilePaths;
 
+}
+
+bool DatabaseManager::deleteFileByID(int fileId) {
+    if (!isConnected()) {
+        std::cerr << "Database is not Connected!" << std::endl;
+        return false;
+    }
+    if (fileId < 1) { // 잘못된 Id, 탈출 숏컷
+        std::cerr << "Invalid FileID for delete: " << fileId << std::endl;
+        return false;
+    }
+
+    sqlite3_stmt* stmt = nullptr;
+    const char* deleteSQL = "DELETE FROM Files WHERE FileID = ?;";
+    int rc = sqlite3_prepare_v2(this->dbConnection, deleteSQL, -1, &stmt, nullptr);
+    if (rc != SQLITE_OK) {
+        std::cerr << "Failed to prepare delete: " << sqlite3_errmsg(dbConnection) << std::endl;
+        return false;
+    }
+
+    sqlite3_bind_int(stmt, 1, fileId);
+    rc = sqlite3_step(stmt);
+
+    if (rc != SQLITE_DONE) {
+        std::cerr << "Failed to execute delete: " << sqlite3_errmsg(dbConnection) << std::endl;
+        sqlite3_finalize(stmt);
+        return false;
+    }
+
+    int changes = sqlite3_changes(dbConnection); // 삭제된 행의 개수 확인
+    if (changes == 0) {
+        std::cout << "No file found with fileID: " << fileId << std::endl;
+        // fileID가 없어서 삭제 안되었어도, 삭제하려던 파일이 없었을 뿐, 시도는 성공한거임.
+    }else {
+        std::cout << "Successfully deleted with fileId: " << fileId << std::endl;
+    }
+    sqlite3_finalize(stmt);
+    return true; // 삭제 성공 혹은 삭제할 파일이 없었을 때.
+}
+
+int DatabaseManager::getFileIdByPath(const std::string& filePath) {
+    if (!isConnected()) {
+        std::cerr << "DatabseManager::getFileIdByPath: Database is not connected!" << std::endl;
+        return -1;
+    }
+    // std::cout << "[DEBUG] getFileIdByPath called with: " << filePath << std::endl; // 디버그 출력
+    sqlite3_stmt* stmt = nullptr;
+    const char* selectSQL = "SELECT FileID FROM Files WHERE FilePath = ?;";
+    int rc = sqlite3_prepare_v2(dbConnection, selectSQL, -1, &stmt, nullptr);
+    if (rc != SQLITE_OK) {
+        std::cerr << "DatabaseManager::getFileIdByPath: Failed to prepare statement." << sqlite3_errmsg(dbConnection) << " (Code: " << rc << ")" << std::endl;
+        return -1;
+    }
+    sqlite3_bind_text(stmt, 1, filePath.c_str(), -1, SQLITE_TRANSIENT);
+    rc = sqlite3_step(stmt); // 쿼리 실행 (중요.. 이거 안하면 fileID가 항상 -1이라 작동 안함)
+
+    int fileId = -1;
+    if (rc == SQLITE_ROW) {
+        fileId = sqlite3_column_int(stmt, 0);
+    }else if (rc != SQLITE_DONE) { // SQLITE_DONE이 아닌 다른 오류 (결과 없음은 SQLITE_DONE)
+        std::cerr << "DatabaseManager::getFileIdByPath: Failed to execute statement: " << sqlite3_errmsg(dbConnection) << " (Code: " << rc << ")" << std::endl;
+    }
+    sqlite3_finalize(stmt);
+    // std::cout << "[DEBUG] getFileIdByPath returns: " << fileId << " for " << filePath << std::endl; // 디버그 출력
+    return fileId;
+}
+
+int DatabaseManager::getTagIdByName(const std::string& tagName) {
+    if (!isConnected()) {
+        std::cerr << "DatabseManager::getTagIdByName: Database is not connected!" << std::endl;
+        return -1;
+    }
+
+    sqlite3_stmt* stmt = nullptr;
+    const char* selectSQL = "SELECT TagID FROM Tags WHERE TagName = ?;";
+    int rc = sqlite3_prepare_v2(dbConnection, selectSQL, -1, &stmt, nullptr);
+    if (rc != SQLITE_OK) {
+        std::cerr << "DatabaseManager::getTagIdByName: Failed to prepare statement." << sqlite3_errmsg(dbConnection) << " (Code: " << rc << ")" << std::endl;
+        return -1;
+    }
+
+    sqlite3_bind_text(stmt, 1, tagName.c_str(), -1, SQLITE_TRANSIENT);
+    rc = sqlite3_step(stmt);
+
+    int tagId = -1;
+    if (rc == SQLITE_ROW) {
+        tagId = sqlite3_column_int(stmt, 0);
+    }else if (rc != SQLITE_DONE) {
+        std::cerr << "DatabaseManager::getTagIdByName: Failed to execute statement: " << sqlite3_errmsg(dbConnection) << std::endl;
+    }
+    sqlite3_finalize(stmt);
+    return tagId;
+}
+
+bool DatabaseManager::deleteTagByID(int tagId) {
+    if (!isConnected()) {
+        std::cerr << "DatabaseManager::deleteTagByID: Database is not connected!" << std::endl;
+        return false;
+    }
+    if (tagId < 1) { // 태그도 1부터 시작
+        std::cerr << "DatabaseManager::deleteTagByID: Invalid tag ID!" << std::endl;
+        return false;
+    }
+
+    sqlite3_stmt* stmt = nullptr;
+    const char* deleteSQL = "DELETE FROM Tags WHERE TagID = ?;";
+
+    int rc = sqlite3_prepare_v2(dbConnection, deleteSQL, -1, &stmt, nullptr);
+    if (rc != SQLITE_OK) {
+        std::cerr << "DatabaseManager::deleteTagByID: Failed to prepare delete tag stmt: " << sqlite3_errmsg(dbConnection) << std::endl;
+        return false;
+    }
+
+    sqlite3_bind_int(stmt, 1, tagId);
+    rc = sqlite3_step(stmt);
+
+    if (rc != SQLITE_DONE) {
+        std::cerr << "DatabaseManager::deleteTagByID: Failed to execute delete tag stmt: " << sqlite3_errmsg(dbConnection) << std::endl;
+        return false;
+    }
+
+    int changes = sqlite3_changes(dbConnection);
+    if (changes == 0) {
+        std::cout << "No Tag found with TagID: " << tagId << std::endl;
+    }else {
+        std::cout << "Tag deleted successfully with tagID: " << tagId << std::endl;
+    }
+
+    sqlite3_finalize(stmt);
+    return true;
+}
+
+std::vector<std::string> DatabaseManager::getAllTagNamesFromDb() {
+    std::vector<std::string> tagNames;
+    if (!isConnected()) {
+        std::cerr << "DatabaseManager::getAllTagNamesFromDb: Database is not connected!" << std::endl;
+        return tagNames;
+    }
+
+    sqlite3_stmt* stmt = nullptr;
+    const char* selectSQL = "SELECT TagName FROM Tags ORDER BY TagName COLLATE NOCASE;"; // 대소문자 구분 없이 알파벳순으로 태그 정렬
+
+    int rc = sqlite3_prepare_v2(dbConnection, selectSQL, -1, &stmt, nullptr);
+    if (rc != SQLITE_OK) {
+        std::cerr << "DatabaseManager::getAllTagNamesFromDb: Failed to prepare statement: " << sqlite3_errmsg(dbConnection) << std::endl;
+        return tagNames;
+    }
+
+    while ((rc = sqlite3_step(stmt)) == SQLITE_ROW) {
+        const unsigned char* tagName = sqlite3_column_text(stmt, 0);
+        if (tagName) {
+            tagNames.push_back(reinterpret_cast<const char*>(tagName)); // 위험을 감수하고 하는 캐스팅으로, 서로 관련이 없는 포인터들 사이의 캐스팅
+        }
+    }
+    if (rc != SQLITE_DONE) {
+        std::cerr << "DatabaseManager::getAllTagNamesFromDb: Failed to execute statement: " << sqlite3_errmsg(dbConnection) << std::endl;
+        tagNames.clear(); // 실행 실패시 벡터 초기화해서 안전하게 리턴함. (오류 중간까지 해서 꼬임 방지)
+    }
+
+    sqlite3_finalize(stmt);
+    return tagNames;
+}
+
+bool DatabaseManager::unLinkFileTagByIds(int fileId, int tagId) {
+    if (!isConnected()) {
+        std::cerr << "DatabaseManager::unLinkFileTagByIds: Database is not connected!" << std::endl;
+        return false;
+    }
+    if (fileId < 1 || tagId < 1) {
+        std::cerr << "DatabaseManager::unLinkFileTagByIds: Invalid FileID or TagID (fileID, tagID = " << fileId << ", " << tagId << ")" << std::endl;
+        return false;
+    }
+
+    sqlite3_stmt* stmt = nullptr;
+    const char* deleteSQL = "DELETE FROM FileTags WHERE FileID = ? AND TagID = ?;";
+
+    int rc = sqlite3_prepare_v2(dbConnection, deleteSQL, -1, &stmt, nullptr);
+    if (rc != SQLITE_OK) {
+        std::cerr << "DatabaseManager::unLinkFileTagByIds: Failed to prepare statement: " << sqlite3_errmsg(dbConnection) << std::endl;
+        return false;
+    }
+    sqlite3_bind_int(stmt, 1, fileId);
+    sqlite3_bind_int(stmt, 2, tagId);
+    rc = sqlite3_step(stmt);
+
+    if (rc != SQLITE_DONE) {
+        std::cerr << "DatabaseManager::unLinkFileTagByIds: Failed to execute statement: " << sqlite3_errmsg(dbConnection) << std::endl;
+        sqlite3_finalize(stmt);
+        return false;
+    }
+
+    int changes = sqlite3_changes(dbConnection);
+    if (changes == 0) {
+        std::cout << "DatabaseManager::unLinkFileTagByIds: No existing link found for FileID " << fileId << " and TagID " << tagId << "." << std::endl;
+    } else {
+        std::cout << "Successfully unlinked FileID " << fileId << " from TagID " << tagId << "." << std::endl;
+    }
+
+    sqlite3_finalize(stmt);
+    return true;
+}
+
+std::vector<std::string> DatabaseManager::getTagsForFileId(int fileId) {
+    std::vector<std::string> tagsForFile;
+    if (!isConnected()) {
+        std::cerr << "DatabaseManager::getTagsForFileId: Database is not connected!" << std::endl;
+        return tagsForFile;
+    }
+    if (fileId < 1) {
+        std::cerr << "DatabaseManager::getTagsForFileId: Invalid fileId: " << fileId << std::endl;
+        return tagsForFile;
+    }
+    sqlite3_stmt* stmt = nullptr;
+    const char* selectSQL = R"(
+        SELECT T.TagName
+        FROM Tags AS T
+        JOIN FileTags AS FT ON T.TagID = FT.TagID
+        WHERE FT.FileID = ?
+        ORDER BY T.TagName COLLATE NOCASE;
+    )"; // 특정 파일에 연결된 태그 이름 가져옴
+    int rc = sqlite3_prepare_v2(dbConnection, selectSQL, -1, &stmt, nullptr);
+    if (rc != SQLITE_OK) {
+        std::cerr << "DatabaseManager::getTagsForFileId: Failed to prepare statement: " << sqlite3_errmsg(dbConnection) << std::endl;
+        return tagsForFile;
+    }
+    sqlite3_bind_int(stmt, 1, fileId);
+
+    while ((rc = sqlite3_step(stmt)) == SQLITE_ROW) {
+        const unsigned char* tagName = sqlite3_column_text(stmt, 0);
+        if (tagName) {
+            tagsForFile.push_back(reinterpret_cast<const char*>(tagName));
+        }
+    }
+    if (rc != SQLITE_DONE) {
+        std::cerr << "DatabaseManager::getTagsForFileId: Failed to execute statement: " << sqlite3_errmsg(dbConnection) << std::endl;
+        tagsForFile.clear();
+    }
+    sqlite3_finalize(stmt);
+    return tagsForFile;
 }

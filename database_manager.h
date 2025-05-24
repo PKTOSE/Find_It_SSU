@@ -28,8 +28,20 @@ public:
     bool linkFileTag(int fileId, int tagId); // 파일 - 태그 연결 (성공 / 실패)
     std::vector<std::string> searchFileByTags(const std::vector<std::string>& tagNames); // 태그 기반 파일 검색
 
+    bool deleteFileByID(int fileId); // 파일 Id으로 파일 정보 삭제
+
+    int getFileIdByPath(const std::string& filePath);// 파일 경로로 FileId 얻는 함수
+    int getTagIdByName(const std::string& tagName); // 태그 이름으로 tagId 얻는 함수
+
+    bool deleteTagByID(int tagId); // 태그ID기반으로 태그 삭제
+
+    std::vector<std::string> getAllTagNamesFromDb(); // db에서 모든 태그 이름을 가져오는 함수
+
+    bool unLinkFileTagByIds(int fileId, int tagId); // 파일 Id, 태그 Id 로 서로간의 연결 끊는 함수
+
+    std::vector<std::string> getTagsForFileId(int fileId);
+
     sqlite3* getDBConnection(){return dbConnection;};
-    // TODO: 데이터 조회 등의 멤버 함수를 추가
 };
 
 #endif //DATABASE_MANAGER_H
