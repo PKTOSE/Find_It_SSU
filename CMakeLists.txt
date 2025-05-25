@@ -1,27 +1,33 @@
 cmake_minimum_required(VERSION 3.30)
-project(file_tag)
+
+project(file_tag) # project() 명령은 find_package 이전에 두는 것이 일반적입니다.
+
+# Qt 6 패키지 찾기
+find_package(Qt6 REQUIRED COMPONENTS Widgets) # 이 줄은 이대로 둡니다.
+
+set(CMAKE_AUTOUIC ON)
+set(CMAKE_AUTOMOC ON) # 시그널/슬롯 사용 시
+set(CMAKE_AUTORCC ON) # 리소스 파일 사용 시
 
 set(CMAKE_CXX_STANDARD 20)
 
-# --- SQLite3 라이브러리 설정 시작 ---
-
-# sqlite3.h 헤더 파일이 있는 디렉토리를 컴파일러에게 알려줍니다.
-# 'libs/sqlite3' 폴더에 sqlite3.h가 있다고 가정합니다.
+# SQLite3 헤더 경로
 include_directories(libs/sqlite3)
 
-# 실행 파일과 소스 파일들을 정의합니다.
-# sqlite3.c 파일은 미리 컴파일된 .lib를 사용하므로 여기에 추가하지 않습니다.
-add_executable(file_tag main.cpp
+# Qt 프로젝트를 위한 실행 파일 정의 (모든 소스 파일을 여기에 포함)
+qt_add_executable(file_tag
+        main.cpp
         database_manager.cpp
         file_manager.cpp
         tag_manager.cpp
-        )
-
-# 실행 파일에 sqlite3 라이브러리를 링크합니다.
-# 'libs/sqlite3' 폴더에 sqlite3.lib 파일이 있다고 가정하고 전체 경로를 지정합니다.
-target_link_libraries(file_tag
-        ${CMAKE_SOURCE_DIR}/libs/sqlite3/sqlite3.lib
+        mainwindow.cpp
+        MainWindow.ui
+        app.rc
+        # 나중에 UI 파일 (.ui) 이나 리소스 파일 (.qrc) 이 생기면 여기에 추가
 )
 
-# --- SQLite3 라이브러리 설정 끝 ---
-
+# Qt 모듈과 SQLite3 라이브러리 링크
+target_link_libraries(file_tag PRIVATE
+        Qt6::Widgets # Qt GUI 기능에 필요
+        ${CMAKE_SOURCE_DIR}/libs/sqlite3/sqlite3.lib # SQLite3 라이브러리
+)

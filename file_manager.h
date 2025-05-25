@@ -16,7 +16,10 @@ public:
     bool deleteFile(const std::string& filePath); // DB에서도 해당 파일 정보 + 연결된 태그 정보 삭제
 
     // 태그 기반 파일 검색 : 태그 목록 받고, 파일 경로 목록 리턴
-    std::vector<std::string> searchFiles(const std::vector<std::string>& tagNames);
+    std::vector<std::string> searchFilesByTags(const std::vector<std::string>& tagNames);
+
+    // 파일 이름 기반 검색 함수
+    std::vector<std::string> searchFilesByName(const std::string& keyword);
 
     /* 파일 경로 업데이트 (파일 이동/이름 변경 시)
     * FileID를 먼저 찾고, 해당 FileID의 filePath를 업데이트 해야 함.

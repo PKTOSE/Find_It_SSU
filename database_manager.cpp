@@ -3,6 +3,8 @@
 #include <set>
 #include <sstream>
 
+#include <QFileInfo> // Qt의 QFileInfo - filesystem 이랑 Qt가 충돌이 일어나는거 같아서 추가
+
 // 생성자
 DatabaseManager::DatabaseManager(const std::string& dbPath): dbConnection(nullptr), databasePath(dbPath){
     // sqlite3_open 함수로 db파일을 연다
@@ -93,14 +95,21 @@ int DatabaseManager::addFile(const std::string& filePath) {
         std::cerr << "Database is not Connected!" << std::endl;
         return -1;
     }
-    // 1. 파일 경로에서 파일 이름 추출
-    std::filesystem::path p(filePath); // path 객체 생성
-    if (!std::filesystem::exists(p)) {
-        std::cerr << "File " << filePath << " does not exist!" << std::endl;
-        return -1; // 파일이 존재 X -> 추가하지 않음
-    }
+    // // 1. 파일 경로에서 파일 이름 추출 - filesystem 사용 방법
+    // std::filesystem::path p(filePath); // path 객체 생성
+    // if (!std::filesystem::exists(p)) {
+    //     std::cerr << "File " << filePath << " does not exist!" << std::endl;
+    //     return -1; // 파일이 존재 X -> 추가하지 않음
+    // }
+    //
+    // std::string fileName = p.filename().string(); // path 객체에 있는 filename 함수..
 
-    std::string fileName = p.filename().string(); // path 객체에 있는 filename 함수..
+    QFileInfo fileInfo(QString::fromStdString(filePath)); // std string을 QString으로 변환
+    if (!fileInfo.exists()) {
+        std::cerr << "File does not exist: " << filePath << std::endl;
+        return -1;
+    }
+    std::string fileName = fileInfo.fileName().toStdString(); // 파일 이름 추출
 
     // SQLite Prepared Statements 객체
     sqlite3_stmt* insertStmt = nullptr;
@@ -600,4 +609,41 @@ std::vector<std::string> DatabaseManager::getTagsForFileId(int fileId) {
     }
     sqlite3_finalize(stmt);
     return tagsForFile;
+}
+
+std::vector<std::string> DatabaseManager::getAllFilePathsFromDb() {
+    std::vector<std::string> filePaths;
+    if (!isConnected()) {
+        std::cerr << "DatabaseManager::getAllFilePaths: Database is not connected!" << std::endl;
+        return filePaths;
+    }
+    std::cout << "[DEBUG] DatabaseManager::getAllFilePathsFromDb: Function started." << std::endl; // 디버그 1
+
+    sqlite3_stmt* stmt = nullptr;
+    const char* selectSQL = "SELECT FilePath FROM Files ORDER BY FileName COLLATE NOCASE;"; // 파일 이름 순 정렬
+
+    int rc = sqlite3_prepare_v2(dbConnection, selectSQL, -1, &stmt, nullptr);
+    if (rc != SQLITE_OK) {
+        std::cerr << "DatabaseManager::getAllFilePathsFromDb: Failed to prepare statement: " << sqlite3_errmsg(dbConnection) << std::endl;
+        return filePaths;
+    }
+    std::cout << "[DEBUG] DatabaseManager::getAllFilePathsFromDb: Statement prepared." << std::endl; // 디버그 2
+
+    while ((rc = sqlite3_step(stmt)) == SQLITE_ROW) {
+        const unsigned char* filePath = sqlite3_column_text(stmt, 0);
+        if (filePath) {
+            filePaths.push_back(reinterpret_cast<const char*>(filePath));
+            std::cout << "[DEBUG] DatabaseManager::getAllFilePathsFromDb: Fetched file: " << filePaths.back() << std::endl; // 디버그 3
+        }
+    }
+    std::cout << "[DEBUG] DatabaseManager::getAllFilePathsFromDb: Data fetching loop finished. Final RC: " << rc << std::endl; // 디버그 4
+
+    if (rc != SQLITE_DONE) {
+        std::cerr << "DatabaseManager::getAllFilePathsFromDb: Failed to execute statement: " << sqlite3_errmsg(dbConnection) << std::endl;
+        filePaths.clear();
+    }
+
+    sqlite3_finalize(stmt);
+    std::cout << "[DEBUG] DatabaseManager::getAllFilePathsFromDb: Statement finalized. Returning " << filePaths.size() << " paths." << std::endl; // 디버그 5
+    return filePaths;
 }

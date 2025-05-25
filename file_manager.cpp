@@ -20,7 +20,7 @@ bool FileManager::addFile(const std::string& filePath) {
 }
 
 // 태그 기반 검색
-std::vector<std::string> FileManager::searchFiles(const std::vector<std::string>& tagNames) {
+std::vector<std::string> FileManager::searchFilesByTags(const std::vector<std::string>& tagNames) {
     if (!dbManager || !dbManager->isConnected()) { // db 연결 실패시
         std::cerr << "FileManager: Database is not connected" << std::endl;
         return {}; // 빈 벡터
@@ -61,8 +61,49 @@ bool FileManager::deleteFile(const std::string& filePath) {
 
 // 모든 파일 경로 가져오기
 std::vector<std::string> FileManager::getAllFilePaths() {
-    std::cerr << "getAllFilePaths: Not implemented feature..." << std::endl;
-    // DatabaseManager에 구현 필요
-    return {};
+    if (!dbManager || !dbManager->isConnected()) {
+        std::cerr << "FileManager::getAllFilePaths: Database is not connected" << std::endl;
+        return {};
+    }
+    // real db jackup do it
+    std::cout << "[DEBUG] FileManager::getAllFilePaths: Calling DatabaseManager::getAllFilePathsFromDb()." << std::endl; // 디버그 6
+    std::vector<std::string> paths = dbManager->getAllFilePathsFromDb();
+    std::cout << "[DEBUG] FileManager::getAllFilePaths: Received " << paths.size() << " paths. Returning." << std::endl; // 디버그 7
+    return paths;
 }
 
+std::vector<std::string> FileManager::searchFilesByName(const std::string& keyword) {
+    std::vector<std::string> foundFilePaths;
+    if (!dbManager || !dbManager->isConnected()) {
+        std::cerr << "FileManager: Database not connected. Cannot search files by name." << std::endl;
+        return foundFilePaths;
+    }
+
+    sqlite3_stmt* stmt = nullptr;
+    const char* selectSQL = "SELECT FilePath FROM Files WHERE FileName LIKE ?;";
+
+    int rc = sqlite3_prepare_v2(dbManager->getDBConnection(), selectSQL, -1, &stmt, nullptr);
+    if (rc != SQLITE_OK) {
+        std::cerr << "Failed to prepare search by name statement: " << sqlite3_errmsg(dbManager->getDBConnection()) << std::endl;
+        return foundFilePaths;
+    }
+
+    std::string searchPattern = "%" + keyword + "%"; // LIKE 검색을 위한 와일드카드 추가
+    sqlite3_bind_text(stmt, 1, searchPattern.c_str(), -1, SQLITE_TRANSIENT);
+
+    while ((rc = sqlite3_step(stmt)) == SQLITE_ROW) {
+        const unsigned char* filePath = sqlite3_column_text(stmt, 0);
+        if (filePath) {
+            foundFilePaths.push_back(reinterpret_cast<const char*>(filePath));
+        }
+    }
+
+    if (rc != SQLITE_DONE) {
+        std::cerr << "Failed to execute search by name statement: " << sqlite3_errmsg(dbManager->getDBConnection()) << " (Code: " << rc << ")" << std::endl;
+        foundFilePaths.clear();
+    }
+
+    sqlite3_finalize(stmt);
+
+    return foundFilePaths;
+}

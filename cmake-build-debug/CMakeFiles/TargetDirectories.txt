@@ -1,3 +1,5 @@
 C:/FILES/CLIonProjects/25-1/file_tag/cmake-build-debug/CMakeFiles/file_tag.dir
 C:/FILES/CLIonProjects/25-1/file_tag/cmake-build-debug/CMakeFiles/edit_cache.dir
 C:/FILES/CLIonProjects/25-1/file_tag/cmake-build-debug/CMakeFiles/rebuild_cache.dir
+C:/FILES/CLIonProjects/25-1/file_tag/cmake-build-debug/CMakeFiles/file_tag_autogen_timestamp_deps.dir
+C:/FILES/CLIonProjects/25-1/file_tag/cmake-build-debug/CMakeFiles/file_tag_autogen.dir

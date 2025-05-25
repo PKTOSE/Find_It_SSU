@@ -39,7 +39,9 @@ public:
 
     bool unLinkFileTagByIds(int fileId, int tagId); // 파일 Id, 태그 Id 로 서로간의 연결 끊는 함수
 
-    std::vector<std::string> getTagsForFileId(int fileId);
+    std::vector<std::string> getTagsForFileId(int fileId); // 파일 id로 모든 태그 가져오는 함수
+
+    std::vector<std::string> getAllFilePathsFromDb();
 
     sqlite3* getDBConnection(){return dbConnection;};
 };
