@@ -18,6 +18,6 @@
 -- Performing Test HAVE_STDATOMIC - Success
 -- Found WrapAtomic: TRUE
 -- Could NOT find WrapVulkanHeaders (missing: Vulkan_INCLUDE_DIR) 
--- Configuring done (3.1s)
--- Generating done (0.2s)
+-- Configuring done (2.5s)
+-- Generating done (0.3s)
 -- Build files have been written to: C:/FILES/CLIonProjects/25-1/file_tag/cmake-build-release

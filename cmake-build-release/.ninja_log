@@ -1,0 +1,16 @@
+# ninja log v6
+23	1367	7698828266092629	find_it_ssu_autogen/timestamp	693a7c38887c2a65
+23	1367	7698828266092629	find_it_ssu_autogen/mocs_compilation.cpp	693a7c38887c2a65
+23	1367	7698828266092629	C:/FILES/CLIonProjects/25-1/file_tag/cmake-build-release/find_it_ssu_autogen/timestamp	693a7c38887c2a65
+23	1367	7698828266092629	C:/FILES/CLIonProjects/25-1/file_tag/cmake-build-release/find_it_ssu_autogen/mocs_compilation.cpp	693a7c38887c2a65
+1378	2017	7698828274018020	find_it_ssu_autogen/EWIEGA46WW/qrc_app_resources.cpp	ef5fd7e1d6d1d11b
+1378	2017	7698828274018020	C:/FILES/CLIonProjects/25-1/file_tag/cmake-build-release/find_it_ssu_autogen/EWIEGA46WW/qrc_app_resources.cpp	ef5fd7e1d6d1d11b
+2057	2250	7698828274533659	CMakeFiles/find_it_ssu.dir/app.rc.obj	b3d633177d19222b
+2043	3691	7698828274387304	CMakeFiles/find_it_ssu.dir/tag_manager.cpp.obj	71977c188b2f3d76
+2035	3938	7698828274315329	CMakeFiles/find_it_ssu.dir/file_manager.cpp.obj	308723366b6968ba
+2018	7250	7698828274136974	CMakeFiles/find_it_ssu.dir/find_it_ssu_autogen/mocs_compilation.cpp.obj	19bc035f6ac3e045
+2023	7327	7698828274183337	CMakeFiles/find_it_ssu.dir/main.cpp.obj	9a459dc3bbf73485
+2029	7370	7698828274245318	CMakeFiles/find_it_ssu.dir/database_manager.cpp.obj	f15a30e876afa1cc
+2050	10243	7698828274464755	CMakeFiles/find_it_ssu.dir/mainwindow.cpp.obj	4f08724995b5480a
+2072	18845	7698828274687427	CMakeFiles/find_it_ssu.dir/find_it_ssu_autogen/EWIEGA46WW/qrc_app_resources.cpp.obj	79f5c9d91ec3f59c
+18845	19191	7698828442406913	find_it_ssu.exe	801e0ea6d406eb9d

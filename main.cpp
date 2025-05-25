@@ -5,6 +5,7 @@
 #include "file_manager.h"
 #include "tag_manager.h"
 #include <iostream> // 디버깅용
+#include <QDebug> // main.cpp에서 qDebug 사용을 위해 추가
 
 int main(int argc, char *argv[]) {
     QApplication app(argc, argv);

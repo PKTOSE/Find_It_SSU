@@ -31,12 +31,6 @@
      <layout class="QHBoxLayout" name="searchHorizontalLayout">
       <item>
        <widget class="QLineEdit" name="searchLineEdit">
-        <property name="font">
-         <font>
-          <family>나눔스퀘어라운드OTF</family>
-          <pointsize>11</pointsize>
-         </font>
-        </property>
         <property name="whatsThis">
          <string/>
         </property>
@@ -50,12 +44,6 @@
       </item>
       <item>
        <widget class="QPushButton" name="searchButton">
-        <property name="font">
-         <font>
-          <family>강한공군체</family>
-          <pointsize>10</pointsize>
-         </font>
-        </property>
         <property name="text">
          <string>검색</string>
         </property>
@@ -90,12 +78,6 @@
             <height>0</height>
            </size>
           </property>
-          <property name="font">
-           <font>
-            <family>나눔스퀘어라운드OTF</family>
-            <pointsize>12</pointsize>
-           </font>
-          </property>
           <property name="columnCount">
            <number>3</number>
           </property>
@@ -108,12 +90,6 @@
          <layout class="QHBoxLayout" name="horizontalLayout">
           <item>
            <widget class="QPushButton" name="deleteFileButton">
-            <property name="font">
-             <font>
-              <family>강한공군체</family>
-              <pointsize>10</pointsize>
-             </font>
-            </property>
             <property name="text">
              <string>파일 삭제</string>
             </property>
@@ -121,12 +97,6 @@
           </item>
           <item>
            <widget class="QPushButton" name="addFileButton">
-            <property name="font">
-             <font>
-              <family>강한공군체</family>
-              <pointsize>10</pointsize>
-             </font>
-            </property>
             <property name="text">
              <string>파일 추가</string>
             </property>
@@ -155,12 +125,6 @@
          <layout class="QHBoxLayout" name="horizontalLayout_2">
           <item>
            <widget class="QPushButton" name="applyTagFilterButton">
-            <property name="font">
-             <font>
-              <family>강한공군체</family>
-              <pointsize>10</pointsize>
-             </font>
-            </property>
             <property name="text">
              <string>태그 필터 적용</string>
             </property>
@@ -168,12 +132,6 @@
           </item>
           <item>
            <widget class="QPushButton" name="showAllFilesButton">
-            <property name="font">
-             <font>
-              <family>강한공군체</family>
-              <pointsize>10</pointsize>
-             </font>
-            </property>
             <property name="text">
              <string>전체 파일 보기</string>
             </property>
@@ -195,12 +153,6 @@
             <height>16777215</height>
            </size>
           </property>
-          <property name="font">
-           <font>
-            <family>나눔스퀘어라운드OTF</family>
-            <pointsize>14</pointsize>
-           </font>
-          </property>
           <property name="selectionMode">
            <enum>QAbstractItemView::SelectionMode::MultiSelection</enum>
           </property>
@@ -214,12 +166,6 @@
             <verstretch>0</verstretch>
            </sizepolicy>
           </property>
-          <property name="font">
-           <font>
-            <family>나눔스퀘어라운드OTF</family>
-            <pointsize>11</pointsize>
-           </font>
-          </property>
           <property name="cursor">
            <cursorShape>IBeamCursor</cursorShape>
           </property>
@@ -229,12 +175,6 @@
          <layout class="QHBoxLayout" name="horizontalLayout_4">
           <item>
            <widget class="QPushButton" name="deleteTagButton">
-            <property name="font">
-             <font>
-              <family>강한공군체</family>
-              <pointsize>10</pointsize>
-             </font>
-            </property>
             <property name="text">
              <string>태그 삭제</string>
             </property>
@@ -242,12 +182,6 @@
           </item>
           <item>
            <widget class="QPushButton" name="addTagButton">
-            <property name="font">
-             <font>
-              <family>강한공군체</family>
-              <pointsize>10</pointsize>
-             </font>
-            </property>
             <property name="text">
              <string>태그 추가</string>
             </property>
@@ -255,12 +189,6 @@
           </item>
           <item>
            <widget class="QPushButton" name="applyTagsButton">
-            <property name="font">
-             <font>
-              <family>강한공군체</family>
-              <pointsize>10</pointsize>
-             </font>
-            </property>
             <property name="text">
              <string>태그 적용</string>
             </property>

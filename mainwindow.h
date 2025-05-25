@@ -5,6 +5,8 @@
 #include <vector>
 #include "file_manager.h"
 #include "tag_manager.h"
+#include <QDragEnterEvent>
+#include <QDropEvent>
 
 // Qt Designer에서 생성된 UI 클래스 Forward Declaration
 namespace Ui {
@@ -39,9 +41,9 @@ private slots:
     void on_applyTagFilterButton_clicked();
     void on_showAllFilesButton_clicked();
 
-    // TODO: 드래그 앤 드롭 이벤트를 위한 오버라이드 함수
-    // virtual void dragEnterEvent(QDragEnterEvent *event) override;
-    // virtual void dropEvent(QDropEvent *event) override;
+    //  드래그 앤 드롭 이벤트를 위한 오버라이드 함수
+    void dragEnterEvent(QDragEnterEvent *event) override;
+    void dropEvent(QDropEvent *event) override;
 
 private:
     Ui::MainWindow *ui; // Qt designer에서 생성한 객체

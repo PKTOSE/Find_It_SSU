@@ -9,8 +9,11 @@
 #include <QFileInfo>
 #include <set>
 #include <algorithm>
-#include <QDesktopServices> // 파일을 열기 위함
+#include <QDesktopServices> // 파일을 열기 위함 (더블클릭 기능 구현)
 #include <Qurl> // 파일 경로를 URL로 변환하기 위함
+#include <QMimeData>
+#include <QFontDatabase> // 폰트 로드
+#include <QApplication> // QApplication::setFont()
 
 MainWindow::MainWindow(std::shared_ptr<FileManager> fileManager,
                        std::shared_ptr<TagManager> tagManager,
@@ -20,9 +23,70 @@ MainWindow::MainWindow(std::shared_ptr<FileManager> fileManager,
       fileManager(std::move(fileManager)),
       tagManager(std::move(tagManager))
 {
-    ui->setupUi(this);
 
+    // --- 두 개의 폰트 로드 ---
+    QString notoFontFamilyName;  // "notoSansKR"의 실제 패밀리 이름
+    QString ganghanFontFamilyName; // "강한공군체 Medium"의 실제 패밀리 이름
+
+    // 첫 번째 폰트 로드 (나눔스퀘어라운드OTFR.otf)
+    int fontId_noto = QFontDatabase::addApplicationFont(":/fonts/NotoSansKR-Regular.ttf");
+    if (fontId_noto != -1) {
+        QStringList fontFamilies = QFontDatabase::applicationFontFamilies(fontId_noto);
+        if (!fontFamilies.isEmpty()) {
+            notoFontFamilyName = fontFamilies.at(0); // 로드된 폰트의 실제 패밀리 이름
+            qDebug() << "Custom font 'NotoSansKR-Regular.ttf' loaded. Detected family: " << notoFontFamilyName;
+        } else {
+            qWarning() << "Custom font 'NotoSansKR-Regular.ttf' loaded, but no font families found.";
+        }
+    } else {
+        qWarning() << "Failed to load custom font from ':/fonts/NotoSansKR-Regular.ttf'. Error ID: " << fontId_noto;
+    }
+
+    // 두 번째 폰트 로드 (ROKAFSlabSerifMedium.otf)
+    int fontId_ganghan = QFontDatabase::addApplicationFont(":/fonts/ROKAFSlabSerifMedium.otf");
+    if (fontId_ganghan != -1) {
+        QStringList fontFamilies = QFontDatabase::applicationFontFamilies(fontId_ganghan);
+        if (!fontFamilies.isEmpty()) {
+            ganghanFontFamilyName = fontFamilies.at(0); // 로드된 폰트의 실제 패밀리 이름
+            qDebug() << "Custom font 'ROKAFSlabSerifMedium.otf' loaded. Detected family: " << ganghanFontFamilyName;
+        } else {
+            qWarning() << "Custom font 'ROKAFSlabSerifMedium.otf' loaded, but no font families found.";
+        }
+    } else {
+        qWarning() << "Failed to load custom font from ':/fonts/ROKAFSlabSerifMedium.otf'. Error ID: " << fontId_ganghan;
+    }
+
+    if (!notoFontFamilyName.isEmpty()) {
+        QFont appFont(notoFontFamilyName); // 실제 패밀리 이름 사용
+        appFont.setPointSize(11); // 원하는 기본 크기 설정
+        QApplication::setFont(appFont); // 전체 애플리케이션에 적용
+        qDebug() << "Applied primary font to application: " << notoFontFamilyName;
+    } else {
+        qWarning() << "Primary font not loaded, using default system font for application.";
+    }
+
+    std::cout << notoFontFamilyName.toStdString().c_str() << std::endl;
+    std::cout << ganghanFontFamilyName.toStdString().c_str() << std::endl;
+
+    ui->setupUi(this);
     setWindowTitle("Find it SSU");
+
+    if (!ganghanFontFamilyName.isEmpty()) {
+        QFont specificWidgetFont(ganghanFontFamilyName); // 실제 패밀리 이름 사용
+        specificWidgetFont.setPointSize(11); // 원하는 크기 설정
+        // 예시: ui->searchLineEdit->setFont(specificWidgetFont);
+        // 예시: ui->someLabel->setFont(specificWidgetFont);
+        ui->searchButton->setFont(specificWidgetFont);
+        ui->addFileButton->setFont(specificWidgetFont);
+        ui->deleteFileButton->setFont(specificWidgetFont);
+        ui->addTagButton->setFont(specificWidgetFont);
+        ui->deleteTagButton->setFont(specificWidgetFont);
+        ui->applyTagsButton->setFont(specificWidgetFont);
+        ui->applyTagFilterButton->setFont(specificWidgetFont);
+        ui->showAllFilesButton->setFont(specificWidgetFont);
+        qDebug() << "Applied secondary font to specific widgets (if applicable): " << ganghanFontFamilyName;
+    }
+
 
     // --- UI 초기 설정 ---
     // 파일 테이블 위젯 초기 설정 (예: 컬럼 헤더)
@@ -38,6 +102,9 @@ MainWindow::MainWindow(std::shared_ptr<FileManager> fileManager,
     ui->mainSplitter->setSizes(splitterSizes);
 
     ui->mainSplitter->setChildrenCollapsible(false);
+
+    // drag&drop 설정
+    setAcceptDrops(true); // MainWindow가 드롭 이벤트를 받아들이도록 설정
 
     // // --- 시그널-슬롯 연결 ---
     // // QLineEdit (searchLineEdit)에서 Enter 키 눌렀을 때
@@ -429,4 +496,42 @@ void MainWindow::on_applyTagFilterButton_clicked() {
 void MainWindow::on_showAllFilesButton_clicked() {
     refreshTagList();
     on_searchLineEdit_returnPressed();
+}
+
+// 드래그 진입 이벤트 처리
+void MainWindow::dragEnterEvent(QDragEnterEvent *event) {
+    // 드롭될 데이터가 파일 경로를 포함하고 있는지 확인
+    if (event->mimeData()->hasUrls()) {
+        event->acceptProposedAction(); // 드롭 이벤트를 받아들임 (마우스 커서 변경)
+    } else {
+        event->ignore(); // 받아들이지 않음
+    }
+}
+
+// 드롭 이벤트 처리
+void MainWindow::dropEvent(QDropEvent *event) {
+    QStringList addedFiles;
+    if (event->mimeData()->hasUrls()) {
+        QList<QUrl> urls = event->mimeData()->urls(); // 드롭된 URL 목록 가져오기
+        for (const QUrl &url : urls) {
+            // 로컬 파일 경로인지 확인하고, 있다면 std::string으로 변환하여 addFile 호출
+            if (url.isLocalFile()) {
+                QString filePath = url.toLocalFile();
+                if (fileManager->addFile(filePath.toStdString())) {
+                    addedFiles.append(filePath);
+                    qDebug() << "File added via drag & drop:" << filePath;
+                } else {
+                    QMessageBox::warning(this, "파일 추가 오류", "파일을 추가할 수 없습니다: " + filePath);
+                    qDebug() << "Failed to add file via drag & drop:" << filePath;
+                }
+            }
+        }
+        if (!addedFiles.isEmpty()) {
+            updateStatusBar(QString::number(addedFiles.size()) + "개 파일이 드래그 앤 드롭으로 추가됨.");
+            on_searchLineEdit_returnPressed(); // 파일 목록 갱신
+        }
+        event->acceptProposedAction(); // 이벤트 처리 완료
+    } else {
+        event->ignore(); // 받아들이지 않음
+    }
 }

@@ -1,0 +1,26 @@
+{
+	"BUILD_DIR" : "C:/FILES/CLIonProjects/25-1/file_tag/cmake-build-release/find_it_ssu_autogen",
+	"CMAKE_BINARY_DIR" : "C:/FILES/CLIonProjects/25-1/file_tag/cmake-build-release",
+	"CMAKE_CURRENT_BINARY_DIR" : "C:/FILES/CLIonProjects/25-1/file_tag/cmake-build-release",
+	"CMAKE_CURRENT_SOURCE_DIR" : "C:/FILES/CLIonProjects/25-1/file_tag",
+	"CMAKE_SOURCE_DIR" : "C:/FILES/CLIonProjects/25-1/file_tag",
+	"CROSS_CONFIG" : false,
+	"GENERATOR" : "Ninja",
+	"INCLUDE_DIR" : "C:/FILES/CLIonProjects/25-1/file_tag/cmake-build-release/find_it_ssu_autogen/include",
+	"INPUTS" : 
+	[
+		"C:/FILES/CLIonProjects/25-1/file_tag/NotoSansKR-Regular.ttf",
+		"C:/FILES/CLIonProjects/25-1/file_tag/ROKAFSlabSerifMedium.otf"
+	],
+	"LOCK_FILE" : "C:/FILES/CLIonProjects/25-1/file_tag/cmake-build-release/CMakeFiles/find_it_ssu_autogen.dir/AutoRcc_app_resources_EWIEGA46WW_Lock.lock",
+	"MULTI_CONFIG" : false,
+	"OPTIONS" : [ "--no-zstd", "-name", "app_resources" ],
+	"OUTPUT_CHECKSUM" : "EWIEGA46WW",
+	"OUTPUT_NAME" : "qrc_app_resources.cpp",
+	"RCC_EXECUTABLE" : "C:/Qt/6.9.0/mingw_64/bin/rcc.exe",
+	"RCC_LIST_OPTIONS" : [ "--list" ],
+	"SETTINGS_FILE" : "C:/FILES/CLIonProjects/25-1/file_tag/cmake-build-release/CMakeFiles/find_it_ssu_autogen.dir/AutoRcc_app_resources_EWIEGA46WW_Used.txt",
+	"SOURCE" : "C:/FILES/CLIonProjects/25-1/file_tag/app_resources.qrc",
+	"USE_BETTER_GRAPH" : true,
+	"VERBOSITY" : 0
+}

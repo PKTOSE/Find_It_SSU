@@ -149,7 +149,7 @@ CMAKE_INSTALL_MANDIR:PATH=
 CMAKE_INSTALL_OLDINCLUDEDIR:PATH=/usr/include
 
 //Install path prefix, prepended onto install directories.
-CMAKE_INSTALL_PREFIX:PATH=C:/Program Files (x86)/file_tag
+CMAKE_INSTALL_PREFIX:PATH=C:/Program Files (x86)/find_it_ssu
 
 //Run-time variable data (LOCALSTATEDIR/run)
 CMAKE_INSTALL_RUNSTATEDIR:PATH=
@@ -208,7 +208,7 @@ CMAKE_PROJECT_DESCRIPTION:STATIC=
 CMAKE_PROJECT_HOMEPAGE_URL:STATIC=
 
 //Value Computed by CMake
-CMAKE_PROJECT_NAME:STATIC=file_tag
+CMAKE_PROJECT_NAME:STATIC=find_it_ssu
 
 //Path to a program.
 CMAKE_RANLIB:FILEPATH=C:/Program Files/JetBrains/CLion 2022.1.1/bin/mingw/bin/ranlib.exe
@@ -352,13 +352,13 @@ Vulkan_LIBRARY:FILEPATH=Vulkan_LIBRARY-NOTFOUND
 WINDEPLOYQT_EXECUTABLE:FILEPATH=C:/Qt/6.9.0/mingw_64/bin/windeployqt.exe
 
 //Value Computed by CMake
-file_tag_BINARY_DIR:STATIC=C:/FILES/CLIonProjects/25-1/file_tag/cmake-build-release
+find_it_ssu_BINARY_DIR:STATIC=C:/FILES/CLIonProjects/25-1/file_tag/cmake-build-release
 
 //Value Computed by CMake
-file_tag_IS_TOP_LEVEL:STATIC=ON
+find_it_ssu_IS_TOP_LEVEL:STATIC=ON
 
 //Value Computed by CMake
-file_tag_SOURCE_DIR:STATIC=C:/FILES/CLIonProjects/25-1/file_tag
+find_it_ssu_SOURCE_DIR:STATIC=C:/FILES/CLIonProjects/25-1/file_tag
 
 
 ########################
@@ -1350,5 +1350,5 @@ Vulkan_LIBRARY-ADVANCED:INTERNAL=1
 //linker supports push/pop state
 _CMAKE_LINKER_PUSHPOP_STATE_SUPPORTED:INTERNAL=TRUE
 //CMAKE_INSTALL_PREFIX during last run
-_GNUInstallDirs_LAST_CMAKE_INSTALL_PREFIX:INTERNAL=C:/Program Files (x86)/file_tag
+_GNUInstallDirs_LAST_CMAKE_INSTALL_PREFIX:INTERNAL=C:/Program Files (x86)/find_it_ssu
 
