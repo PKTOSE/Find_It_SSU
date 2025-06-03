@@ -69,7 +69,7 @@ MainWindow::MainWindow(std::shared_ptr<FileManager> fileManager,
     std::cout << ganghanFontFamilyName.toStdString().c_str() << std::endl;
 
     ui->setupUi(this);
-    setWindowTitle("Find it SSU");
+    setWindowTitle("Find IT SSU");
 
     if (!ganghanFontFamilyName.isEmpty()) {
         QFont specificWidgetFont(ganghanFontFamilyName); // 실제 패밀리 이름 사용
