@@ -313,26 +313,45 @@ void MainWindow::on_applyTagsButton_clicked() {
     std::vector<std::string> selectedTagNames = getSelectedTagNames();
 
     if (selectedFilePaths.empty()) {
-        QMessageBox::information(this, "태그 적용", "태그를 적용할 파일을 먼저 선택해주세요.");
+        QMessageBox::information(this, "태그 적용 / 해제", "태그를 적용하거나 해제할 파일을 먼저 선택해주세요.");
         return;
     }
     if (selectedTagNames.empty()) {
-        QMessageBox::information(this, "태그 적용", "적용할 태그를 먼저 선택해주세요.");
+        QMessageBox::information(this, "태그 적용 / 해제", "적용하거나 해제할 태그를 먼저 선택해주세요.");
         return;
     }
 
     int linkedCount = 0;
+    int unlinkedCount = 0;
     for (const std::string& filePath : selectedFilePaths) {
+        // 현재 파일에 연결된 태그 목록을 가져온다.
+        std::vector<std::string> currentTagsForFile = tagManager->getTagsForFile(filePath);
+        // 검색 효율을 위해 현재 태그 목록을 set으로 변환
+        std::set<std::string> currentTagsSet(currentTagsForFile.begin(), currentTagsForFile.end());
+
+        // 선택된 각 태그
         for (const std::string& tagName : selectedTagNames) {
-            if (tagManager->linkFileWithTag(filePath, tagName)) {
-                linkedCount++;
-                qDebug() << "Linked: " << QString::fromStdString(filePath) << " with " << QString::fromStdString(tagName);
-            } else {
-                qDebug() << "Failed to link: " << QString::fromStdString(filePath) << " with " << QString::fromStdString(tagName);
+            // 현재 파일에 이 태그가 연결되어있는지
+            bool isAlreadyLinked = currentTagsSet.count(tagName) > 0;
+            if (isAlreadyLinked) {
+                // 이미 연결되어 있으면 해제
+                if (tagManager->unlinkFileFromTag(filePath, tagName)) {
+                    unlinkedCount++;
+                    qDebug() << "Tag unlinked:" << QString::fromStdString(filePath) << "from" << QString::fromStdString(tagName);
+                }else {
+                    qDebug() << "Failed to unlink: " << QString::fromStdString(filePath) << "from" << QString::fromStdString(tagName);
+                }
+            }else { // 태그 연결 정보가 없다면 연결
+                if (tagManager->linkFileWithTag(filePath, tagName)) {
+                    linkedCount++;
+                    qDebug() << "Linked: " << QString::fromStdString(filePath) << " with " << QString::fromStdString(tagName);
+                } else {
+                    qDebug() << "Failed to link: " << QString::fromStdString(filePath) << " with " << QString::fromStdString(tagName);
+                }
             }
         }
     }
-    updateStatusBar(QString::number(linkedCount) + "개 태그 연결 작업 완료.");
+    updateStatusBar("태그 작업 완료: 연결 " + QString::number(linkedCount) + "개, 해제 " + QString::number(unlinkedCount) + "개");
     // 파일 목록 다시 로드하여 태그 정보 갱신
     on_searchLineEdit_returnPressed(); // 태그 적용 시, 파일 목록 리로드
     refreshTagList(); // 태그 목록 갱신

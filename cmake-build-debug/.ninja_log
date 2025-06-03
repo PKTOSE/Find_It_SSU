@@ -1,17 +1,17 @@
 # ninja log v6
-16	187	7706304514390058	find_it_ssu_autogen/timestamp	983fe04a6f60e37f
-16	187	7706304514390058	find_it_ssu_autogen/mocs_compilation.cpp	983fe04a6f60e37f
-16	187	7706304514390058	C:/FILES/CLIonProjects/25-1/file_tag/cmake-build-debug/find_it_ssu_autogen/timestamp	983fe04a6f60e37f
+19	197	7706324596028010	find_it_ssu_autogen/timestamp	983fe04a6f60e37f
+19	197	7706324596028010	find_it_ssu_autogen/mocs_compilation.cpp	983fe04a6f60e37f
+19	197	7706324596028010	C:/FILES/CLIonProjects/25-1/file_tag/cmake-build-debug/find_it_ssu_autogen/timestamp	983fe04a6f60e37f
 819	15787	7698823601770134	CMakeFiles/find_it_ssu.dir/find_it_ssu_autogen/EWIEGA46WW/qrc_app_resources.cpp.obj	25a5d2040bcc1888
 192	806	7698823601479791	C:/FILES/CLIonProjects/25-1/file_tag/cmake-build-debug/find_it_ssu_autogen/EWIEGA46WW/qrc_app_resources.cpp	50dab7916bf3ee48
 1244	3230	7698790708037362	CMakeFiles/find_it_ssu.dir/tag_manager.cpp.obj	588b58f9ef2d237a
-16	187	7706304514390058	C:/FILES/CLIonProjects/25-1/file_tag/cmake-build-debug/find_it_ssu_autogen/mocs_compilation.cpp	983fe04a6f60e37f
+19	197	7706324596028010	C:/FILES/CLIonProjects/25-1/file_tag/cmake-build-debug/find_it_ssu_autogen/mocs_compilation.cpp	983fe04a6f60e37f
 192	806	7698823601479791	find_it_ssu_autogen/EWIEGA46WW/qrc_app_resources.cpp	50dab7916bf3ee48
 1261	1431	7698790708213233	CMakeFiles/find_it_ssu.dir/app.rc.obj	c63744b1f833c3e4
 1238	3322	7698790707975991	CMakeFiles/find_it_ssu.dir/file_manager.cpp.obj	6fe687bc1902e67c
-13	753	7706308002011800	build.ninja	ecb5a84d30596968
+13	753	7706328868375756	build.ninja	ecb5a84d30596968
 1232	7329	7698790707925980	CMakeFiles/find_it_ssu.dir/database_manager.cpp.obj	5e4001caa32960e1
 1222	7696	7698790707825992	CMakeFiles/find_it_ssu.dir/find_it_ssu_autogen/mocs_compilation.cpp.obj	cba9ad0f2dddfc7c
 806	5494	7698823601643248	CMakeFiles/find_it_ssu.dir/main.cpp.obj	858640d55445f21a
-188	5245	7706304516114104	CMakeFiles/find_it_ssu.dir/mainwindow.cpp.obj	5295b974aaac0f68
-5246	5926	7706304566693883	find_it_ssu.exe	6d1d8e96f69409ce
+198	5075	7706324597831229	CMakeFiles/find_it_ssu.dir/mainwindow.cpp.obj	5295b974aaac0f68
+5075	5818	7706324646600101	find_it_ssu.exe	6d1d8e96f69409ce
