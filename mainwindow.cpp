@@ -334,8 +334,8 @@ void MainWindow::on_applyTagsButton_clicked() {
     }
     updateStatusBar(QString::number(linkedCount) + "개 태그 연결 작업 완료.");
     // 파일 목록 다시 로드하여 태그 정보 갱신
-    refreshTagList();
-    on_searchLineEdit_returnPressed();
+    on_searchLineEdit_returnPressed(); // 태그 적용 시, 파일 목록 리로드
+    refreshTagList(); // 태그 목록 갱신
 }
 
 // 파일 테이블 위젯 선택 변경 시
